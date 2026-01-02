@@ -27,113 +27,52 @@ type Address struct {
 	Unit       *string            `json:"unit"`
 }
 
-// AddressCreate defines model for AddressCreate.
-type AddressCreate struct {
-	City       string  `json:"city"`
-	Country    string  `json:"country"`
-	PostalCode string  `json:"postalCode"`
-	Region     *string `json:"region,omitempty"`
-	Street     string  `json:"street"`
-	Unit       *string `json:"unit,omitempty"`
+// CreatePlaceRequest defines model for CreatePlaceRequest.
+type CreatePlaceRequest = Place
+
+// PatchResource defines model for PatchResource.
+type PatchResource struct {
+	Op    *string                 `json:"op,omitempty"`
+	Path  *string                 `json:"path,omitempty"`
+	Value *map[string]interface{} `json:"value,omitempty"`
 }
 
-// AddressUpdate defines model for AddressUpdate.
-type AddressUpdate struct {
-	City       string              `json:"city"`
-	Country    string              `json:"country"`
-	Id         *openapi_types.UUID `json:"id,omitempty"`
-	PostalCode string              `json:"postalCode"`
-	Region     *string             `json:"region,omitempty"`
-	Street     string              `json:"street"`
-	Unit       *string             `json:"unit,omitempty"`
-}
-
-// Restaurant defines model for Restaurant.
-type Restaurant struct {
-	// AddressId Reference to an Address id
-	AddressId   openapi_types.UUID `json:"addressId"`
-	Description *string            `json:"description"`
-	Id          openapi_types.UUID `json:"id"`
-	Name        string             `json:"name"`
-	Phone       *string            `json:"phone"`
-	Website     *string            `json:"website"`
-}
-
-// RestaurantCreate defines model for RestaurantCreate.
-type RestaurantCreate struct {
-	AddressId   openapi_types.UUID `json:"addressId"`
-	Description *string            `json:"description,omitempty"`
-	Name        string             `json:"name"`
-	Phone       *string            `json:"phone,omitempty"`
-	Website     *string            `json:"website,omitempty"`
-}
-
-// RestaurantUpdate defines model for RestaurantUpdate.
-type RestaurantUpdate struct {
-	AddressId   openapi_types.UUID  `json:"addressId"`
-	Description *string             `json:"description,omitempty"`
+// Place defines model for Place.
+type Place struct {
+	Address     *Address            `json:"address,omitempty"`
+	Description *string             `json:"description"`
 	Id          *openapi_types.UUID `json:"id,omitempty"`
-	Name        string              `json:"name"`
-	Phone       *string             `json:"phone,omitempty"`
-	Website     *string             `json:"website,omitempty"`
+	Name        *string             `json:"name,omitempty"`
+	Phone       *string             `json:"phone"`
+	Website     *string             `json:"website"`
 }
 
-// ListAddressesParams defines parameters for ListAddresses.
-type ListAddressesParams struct {
-	Limit  *int32 `form:"limit,omitempty" json:"limit,omitempty"`
-	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
-}
+// Id defines model for id.
+type Id = string
 
-// ListRestaurantsParams defines parameters for ListRestaurants.
-type ListRestaurantsParams struct {
-	Limit  *int32 `form:"limit,omitempty" json:"limit,omitempty"`
-	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
-}
+// CreatePlaceJSONRequestBody defines body for CreatePlace for application/json ContentType.
+type CreatePlaceJSONRequestBody = CreatePlaceRequest
 
-// CreateAddressJSONRequestBody defines body for CreateAddress for application/json ContentType.
-type CreateAddressJSONRequestBody = AddressCreate
-
-// UpdateAddressJSONRequestBody defines body for UpdateAddress for application/json ContentType.
-type UpdateAddressJSONRequestBody = AddressUpdate
-
-// CreateRestaurantJSONRequestBody defines body for CreateRestaurant for application/json ContentType.
-type CreateRestaurantJSONRequestBody = RestaurantCreate
-
-// UpdateRestaurantJSONRequestBody defines body for UpdateRestaurant for application/json ContentType.
-type UpdateRestaurantJSONRequestBody = RestaurantUpdate
+// PatchPlaceJSONRequestBody defines body for PatchPlace for application/json ContentType.
+type PatchPlaceJSONRequestBody = PatchResource
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
-	// List addresses
-	// (GET /addresses)
-	ListAddresses(w http.ResponseWriter, r *http.Request, params ListAddressesParams)
-	// Create an address
-	// (POST /addresses)
-	CreateAddress(w http.ResponseWriter, r *http.Request)
-	// Delete an address
-	// (DELETE /addresses/{id})
-	DeleteAddress(w http.ResponseWriter, r *http.Request, id string)
-	// Get an address by id
-	// (GET /addresses/{id})
-	GetAddress(w http.ResponseWriter, r *http.Request, id string)
-	// Update an address
-	// (PUT /addresses/{id})
-	UpdateAddress(w http.ResponseWriter, r *http.Request, id string)
-	// List restaurants
-	// (GET /restaurants)
-	ListRestaurants(w http.ResponseWriter, r *http.Request, params ListRestaurantsParams)
-	// Create a restaurant
-	// (POST /restaurants)
-	CreateRestaurant(w http.ResponseWriter, r *http.Request)
-	// Delete a restaurant
-	// (DELETE /restaurants/{id})
-	DeleteRestaurant(w http.ResponseWriter, r *http.Request, id string)
-	// Get a restaurant by id
-	// (GET /restaurants/{id})
-	GetRestaurant(w http.ResponseWriter, r *http.Request, id string)
-	// Update a restaurant
-	// (PUT /restaurants/{id})
-	UpdateRestaurant(w http.ResponseWriter, r *http.Request, id string)
+	// List places
+	// (GET /places)
+	ListPlaces(w http.ResponseWriter, r *http.Request)
+	// Create an place
+	// (POST /places)
+	CreatePlace(w http.ResponseWriter, r *http.Request)
+	// Delete place
+	// (DELETE /places/{id})
+	DeletePlace(w http.ResponseWriter, r *http.Request, id Id)
+	// Get a place by id
+	// (GET /places/{id})
+	GetPlace(w http.ResponseWriter, r *http.Request, id Id)
+	// Patch place
+	// (PATCH /places/{id})
+	PatchPlace(w http.ResponseWriter, r *http.Request, id Id)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -145,32 +84,11 @@ type ServerInterfaceWrapper struct {
 
 type MiddlewareFunc func(http.Handler) http.Handler
 
-// ListAddresses operation middleware
-func (siw *ServerInterfaceWrapper) ListAddresses(w http.ResponseWriter, r *http.Request) {
-
-	var err error
-
-	// Parameter object where we will unmarshal all parameters from the context
-	var params ListAddressesParams
-
-	// ------------- Optional query parameter "limit" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "limit", r.URL.Query(), &params.Limit)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "limit", Err: err})
-		return
-	}
-
-	// ------------- Optional query parameter "offset" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "offset", r.URL.Query(), &params.Offset)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "offset", Err: err})
-		return
-	}
+// ListPlaces operation middleware
+func (siw *ServerInterfaceWrapper) ListPlaces(w http.ResponseWriter, r *http.Request) {
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.ListAddresses(w, r, params)
+		siw.Handler.ListPlaces(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -180,11 +98,11 @@ func (siw *ServerInterfaceWrapper) ListAddresses(w http.ResponseWriter, r *http.
 	handler.ServeHTTP(w, r)
 }
 
-// CreateAddress operation middleware
-func (siw *ServerInterfaceWrapper) CreateAddress(w http.ResponseWriter, r *http.Request) {
+// CreatePlace operation middleware
+func (siw *ServerInterfaceWrapper) CreatePlace(w http.ResponseWriter, r *http.Request) {
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.CreateAddress(w, r)
+		siw.Handler.CreatePlace(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -194,13 +112,13 @@ func (siw *ServerInterfaceWrapper) CreateAddress(w http.ResponseWriter, r *http.
 	handler.ServeHTTP(w, r)
 }
 
-// DeleteAddress operation middleware
-func (siw *ServerInterfaceWrapper) DeleteAddress(w http.ResponseWriter, r *http.Request) {
+// DeletePlace operation middleware
+func (siw *ServerInterfaceWrapper) DeletePlace(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 
 	// ------------- Path parameter "id" -------------
-	var id string
+	var id Id
 
 	err = runtime.BindStyledParameterWithOptions("simple", "id", r.PathValue("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
@@ -209,7 +127,7 @@ func (siw *ServerInterfaceWrapper) DeleteAddress(w http.ResponseWriter, r *http.
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.DeleteAddress(w, r, id)
+		siw.Handler.DeletePlace(w, r, id)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -219,13 +137,13 @@ func (siw *ServerInterfaceWrapper) DeleteAddress(w http.ResponseWriter, r *http.
 	handler.ServeHTTP(w, r)
 }
 
-// GetAddress operation middleware
-func (siw *ServerInterfaceWrapper) GetAddress(w http.ResponseWriter, r *http.Request) {
+// GetPlace operation middleware
+func (siw *ServerInterfaceWrapper) GetPlace(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 
 	// ------------- Path parameter "id" -------------
-	var id string
+	var id Id
 
 	err = runtime.BindStyledParameterWithOptions("simple", "id", r.PathValue("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
@@ -234,7 +152,7 @@ func (siw *ServerInterfaceWrapper) GetAddress(w http.ResponseWriter, r *http.Req
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetAddress(w, r, id)
+		siw.Handler.GetPlace(w, r, id)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -244,13 +162,13 @@ func (siw *ServerInterfaceWrapper) GetAddress(w http.ResponseWriter, r *http.Req
 	handler.ServeHTTP(w, r)
 }
 
-// UpdateAddress operation middleware
-func (siw *ServerInterfaceWrapper) UpdateAddress(w http.ResponseWriter, r *http.Request) {
+// PatchPlace operation middleware
+func (siw *ServerInterfaceWrapper) PatchPlace(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 
 	// ------------- Path parameter "id" -------------
-	var id string
+	var id Id
 
 	err = runtime.BindStyledParameterWithOptions("simple", "id", r.PathValue("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
@@ -259,131 +177,7 @@ func (siw *ServerInterfaceWrapper) UpdateAddress(w http.ResponseWriter, r *http.
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.UpdateAddress(w, r, id)
-	}))
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// ListRestaurants operation middleware
-func (siw *ServerInterfaceWrapper) ListRestaurants(w http.ResponseWriter, r *http.Request) {
-
-	var err error
-
-	// Parameter object where we will unmarshal all parameters from the context
-	var params ListRestaurantsParams
-
-	// ------------- Optional query parameter "limit" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "limit", r.URL.Query(), &params.Limit)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "limit", Err: err})
-		return
-	}
-
-	// ------------- Optional query parameter "offset" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "offset", r.URL.Query(), &params.Offset)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "offset", Err: err})
-		return
-	}
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.ListRestaurants(w, r, params)
-	}))
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// CreateRestaurant operation middleware
-func (siw *ServerInterfaceWrapper) CreateRestaurant(w http.ResponseWriter, r *http.Request) {
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.CreateRestaurant(w, r)
-	}))
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// DeleteRestaurant operation middleware
-func (siw *ServerInterfaceWrapper) DeleteRestaurant(w http.ResponseWriter, r *http.Request) {
-
-	var err error
-
-	// ------------- Path parameter "id" -------------
-	var id string
-
-	err = runtime.BindStyledParameterWithOptions("simple", "id", r.PathValue("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
-		return
-	}
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.DeleteRestaurant(w, r, id)
-	}))
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// GetRestaurant operation middleware
-func (siw *ServerInterfaceWrapper) GetRestaurant(w http.ResponseWriter, r *http.Request) {
-
-	var err error
-
-	// ------------- Path parameter "id" -------------
-	var id string
-
-	err = runtime.BindStyledParameterWithOptions("simple", "id", r.PathValue("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
-		return
-	}
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetRestaurant(w, r, id)
-	}))
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// UpdateRestaurant operation middleware
-func (siw *ServerInterfaceWrapper) UpdateRestaurant(w http.ResponseWriter, r *http.Request) {
-
-	var err error
-
-	// ------------- Path parameter "id" -------------
-	var id string
-
-	err = runtime.BindStyledParameterWithOptions("simple", "id", r.PathValue("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
-		return
-	}
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.UpdateRestaurant(w, r, id)
+		siw.Handler.PatchPlace(w, r, id)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -513,276 +307,154 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 		ErrorHandlerFunc:   options.ErrorHandlerFunc,
 	}
 
-	m.HandleFunc("GET "+options.BaseURL+"/addresses", wrapper.ListAddresses)
-	m.HandleFunc("POST "+options.BaseURL+"/addresses", wrapper.CreateAddress)
-	m.HandleFunc("DELETE "+options.BaseURL+"/addresses/{id}", wrapper.DeleteAddress)
-	m.HandleFunc("GET "+options.BaseURL+"/addresses/{id}", wrapper.GetAddress)
-	m.HandleFunc("PUT "+options.BaseURL+"/addresses/{id}", wrapper.UpdateAddress)
-	m.HandleFunc("GET "+options.BaseURL+"/restaurants", wrapper.ListRestaurants)
-	m.HandleFunc("POST "+options.BaseURL+"/restaurants", wrapper.CreateRestaurant)
-	m.HandleFunc("DELETE "+options.BaseURL+"/restaurants/{id}", wrapper.DeleteRestaurant)
-	m.HandleFunc("GET "+options.BaseURL+"/restaurants/{id}", wrapper.GetRestaurant)
-	m.HandleFunc("PUT "+options.BaseURL+"/restaurants/{id}", wrapper.UpdateRestaurant)
+	m.HandleFunc("GET "+options.BaseURL+"/places", wrapper.ListPlaces)
+	m.HandleFunc("POST "+options.BaseURL+"/places", wrapper.CreatePlace)
+	m.HandleFunc("DELETE "+options.BaseURL+"/places/{id}", wrapper.DeletePlace)
+	m.HandleFunc("GET "+options.BaseURL+"/places/{id}", wrapper.GetPlace)
+	m.HandleFunc("PATCH "+options.BaseURL+"/places/{id}", wrapper.PatchPlace)
 
 	return m
 }
 
-type ListAddressesRequestObject struct {
-	Params ListAddressesParams
+type DeletedResponse struct {
 }
 
-type ListAddressesResponseObject interface {
-	VisitListAddressesResponse(w http.ResponseWriter) error
+type NotFoundResponse struct {
 }
 
-type ListAddresses200JSONResponse struct {
+type UpdatedResponse struct {
+}
+
+type ListPlacesRequestObject struct {
+}
+
+type ListPlacesResponseObject interface {
+	VisitListPlacesResponse(w http.ResponseWriter) error
+}
+
+type ListPlaces200JSONResponse struct {
 	Items *[]Address `json:"items,omitempty"`
 	Total *int       `json:"total,omitempty"`
 }
 
-func (response ListAddresses200JSONResponse) VisitListAddressesResponse(w http.ResponseWriter) error {
+func (response ListPlaces200JSONResponse) VisitListPlacesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CreateAddressRequestObject struct {
-	Body *CreateAddressJSONRequestBody
+type CreatePlaceRequestObject struct {
+	Body *CreatePlaceJSONRequestBody
 }
 
-type CreateAddressResponseObject interface {
-	VisitCreateAddressResponse(w http.ResponseWriter) error
+type CreatePlaceResponseObject interface {
+	VisitCreatePlaceResponse(w http.ResponseWriter) error
 }
 
-type CreateAddress201JSONResponse Address
+type CreatePlace201ResponseHeaders struct {
+	Location interface{}
+}
 
-func (response CreateAddress201JSONResponse) VisitCreateAddressResponse(w http.ResponseWriter) error {
+type CreatePlace201JSONResponse struct {
+	Body    Place
+	Headers CreatePlace201ResponseHeaders
+}
+
+func (response CreatePlace201JSONResponse) VisitCreatePlaceResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Location", fmt.Sprint(response.Headers.Location))
 	w.WriteHeader(201)
 
-	return json.NewEncoder(w).Encode(response)
+	return json.NewEncoder(w).Encode(response.Body)
 }
 
-type DeleteAddressRequestObject struct {
-	Id string `json:"id"`
+type DeletePlaceRequestObject struct {
+	Id Id `json:"id"`
 }
 
-type DeleteAddressResponseObject interface {
-	VisitDeleteAddressResponse(w http.ResponseWriter) error
+type DeletePlaceResponseObject interface {
+	VisitDeletePlaceResponse(w http.ResponseWriter) error
 }
 
-type DeleteAddress204Response struct {
-}
+type DeletePlace204Response = DeletedResponse
 
-func (response DeleteAddress204Response) VisitDeleteAddressResponse(w http.ResponseWriter) error {
+func (response DeletePlace204Response) VisitDeletePlaceResponse(w http.ResponseWriter) error {
 	w.WriteHeader(204)
 	return nil
 }
 
-type DeleteAddress404Response struct {
-}
+type DeletePlace404Response = NotFoundResponse
 
-func (response DeleteAddress404Response) VisitDeleteAddressResponse(w http.ResponseWriter) error {
+func (response DeletePlace404Response) VisitDeletePlaceResponse(w http.ResponseWriter) error {
 	w.WriteHeader(404)
 	return nil
 }
 
-type GetAddressRequestObject struct {
-	Id string `json:"id"`
+type GetPlaceRequestObject struct {
+	Id Id `json:"id"`
 }
 
-type GetAddressResponseObject interface {
-	VisitGetAddressResponse(w http.ResponseWriter) error
+type GetPlaceResponseObject interface {
+	VisitGetPlaceResponse(w http.ResponseWriter) error
 }
 
-type GetAddress200JSONResponse Address
+type GetPlace200JSONResponse Place
 
-func (response GetAddress200JSONResponse) VisitGetAddressResponse(w http.ResponseWriter) error {
+func (response GetPlace200JSONResponse) VisitGetPlaceResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetAddress404Response struct {
-}
+type GetPlace404Response = NotFoundResponse
 
-func (response GetAddress404Response) VisitGetAddressResponse(w http.ResponseWriter) error {
+func (response GetPlace404Response) VisitGetPlaceResponse(w http.ResponseWriter) error {
 	w.WriteHeader(404)
 	return nil
 }
 
-type UpdateAddressRequestObject struct {
-	Id   string `json:"id"`
-	Body *UpdateAddressJSONRequestBody
+type PatchPlaceRequestObject struct {
+	Id   Id `json:"id"`
+	Body *PatchPlaceJSONRequestBody
 }
 
-type UpdateAddressResponseObject interface {
-	VisitUpdateAddressResponse(w http.ResponseWriter) error
+type PatchPlaceResponseObject interface {
+	VisitPatchPlaceResponse(w http.ResponseWriter) error
 }
 
-type UpdateAddress200JSONResponse Address
+type PatchPlace204Response = UpdatedResponse
 
-func (response UpdateAddress200JSONResponse) VisitUpdateAddressResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type UpdateAddress404Response struct {
-}
-
-func (response UpdateAddress404Response) VisitUpdateAddressResponse(w http.ResponseWriter) error {
-	w.WriteHeader(404)
-	return nil
-}
-
-type ListRestaurantsRequestObject struct {
-	Params ListRestaurantsParams
-}
-
-type ListRestaurantsResponseObject interface {
-	VisitListRestaurantsResponse(w http.ResponseWriter) error
-}
-
-type ListRestaurants200JSONResponse struct {
-	Items *[]Restaurant `json:"items,omitempty"`
-	Total *int          `json:"total,omitempty"`
-}
-
-func (response ListRestaurants200JSONResponse) VisitListRestaurantsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type CreateRestaurantRequestObject struct {
-	Body *CreateRestaurantJSONRequestBody
-}
-
-type CreateRestaurantResponseObject interface {
-	VisitCreateRestaurantResponse(w http.ResponseWriter) error
-}
-
-type CreateRestaurant201JSONResponse Restaurant
-
-func (response CreateRestaurant201JSONResponse) VisitCreateRestaurantResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(201)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type DeleteRestaurantRequestObject struct {
-	Id string `json:"id"`
-}
-
-type DeleteRestaurantResponseObject interface {
-	VisitDeleteRestaurantResponse(w http.ResponseWriter) error
-}
-
-type DeleteRestaurant204Response struct {
-}
-
-func (response DeleteRestaurant204Response) VisitDeleteRestaurantResponse(w http.ResponseWriter) error {
+func (response PatchPlace204Response) VisitPatchPlaceResponse(w http.ResponseWriter) error {
 	w.WriteHeader(204)
 	return nil
 }
 
-type DeleteRestaurant404Response struct {
-}
+type PatchPlace404Response = NotFoundResponse
 
-func (response DeleteRestaurant404Response) VisitDeleteRestaurantResponse(w http.ResponseWriter) error {
-	w.WriteHeader(404)
-	return nil
-}
-
-type GetRestaurantRequestObject struct {
-	Id string `json:"id"`
-}
-
-type GetRestaurantResponseObject interface {
-	VisitGetRestaurantResponse(w http.ResponseWriter) error
-}
-
-type GetRestaurant200JSONResponse Restaurant
-
-func (response GetRestaurant200JSONResponse) VisitGetRestaurantResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type GetRestaurant404Response struct {
-}
-
-func (response GetRestaurant404Response) VisitGetRestaurantResponse(w http.ResponseWriter) error {
-	w.WriteHeader(404)
-	return nil
-}
-
-type UpdateRestaurantRequestObject struct {
-	Id   string `json:"id"`
-	Body *UpdateRestaurantJSONRequestBody
-}
-
-type UpdateRestaurantResponseObject interface {
-	VisitUpdateRestaurantResponse(w http.ResponseWriter) error
-}
-
-type UpdateRestaurant200JSONResponse Restaurant
-
-func (response UpdateRestaurant200JSONResponse) VisitUpdateRestaurantResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type UpdateRestaurant404Response struct {
-}
-
-func (response UpdateRestaurant404Response) VisitUpdateRestaurantResponse(w http.ResponseWriter) error {
+func (response PatchPlace404Response) VisitPatchPlaceResponse(w http.ResponseWriter) error {
 	w.WriteHeader(404)
 	return nil
 }
 
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
-	// List addresses
-	// (GET /addresses)
-	ListAddresses(ctx context.Context, request ListAddressesRequestObject) (ListAddressesResponseObject, error)
-	// Create an address
-	// (POST /addresses)
-	CreateAddress(ctx context.Context, request CreateAddressRequestObject) (CreateAddressResponseObject, error)
-	// Delete an address
-	// (DELETE /addresses/{id})
-	DeleteAddress(ctx context.Context, request DeleteAddressRequestObject) (DeleteAddressResponseObject, error)
-	// Get an address by id
-	// (GET /addresses/{id})
-	GetAddress(ctx context.Context, request GetAddressRequestObject) (GetAddressResponseObject, error)
-	// Update an address
-	// (PUT /addresses/{id})
-	UpdateAddress(ctx context.Context, request UpdateAddressRequestObject) (UpdateAddressResponseObject, error)
-	// List restaurants
-	// (GET /restaurants)
-	ListRestaurants(ctx context.Context, request ListRestaurantsRequestObject) (ListRestaurantsResponseObject, error)
-	// Create a restaurant
-	// (POST /restaurants)
-	CreateRestaurant(ctx context.Context, request CreateRestaurantRequestObject) (CreateRestaurantResponseObject, error)
-	// Delete a restaurant
-	// (DELETE /restaurants/{id})
-	DeleteRestaurant(ctx context.Context, request DeleteRestaurantRequestObject) (DeleteRestaurantResponseObject, error)
-	// Get a restaurant by id
-	// (GET /restaurants/{id})
-	GetRestaurant(ctx context.Context, request GetRestaurantRequestObject) (GetRestaurantResponseObject, error)
-	// Update a restaurant
-	// (PUT /restaurants/{id})
-	UpdateRestaurant(ctx context.Context, request UpdateRestaurantRequestObject) (UpdateRestaurantResponseObject, error)
+	// List places
+	// (GET /places)
+	ListPlaces(ctx context.Context, request ListPlacesRequestObject) (ListPlacesResponseObject, error)
+	// Create an place
+	// (POST /places)
+	CreatePlace(ctx context.Context, request CreatePlaceRequestObject) (CreatePlaceResponseObject, error)
+	// Delete place
+	// (DELETE /places/{id})
+	DeletePlace(ctx context.Context, request DeletePlaceRequestObject) (DeletePlaceResponseObject, error)
+	// Get a place by id
+	// (GET /places/{id})
+	GetPlace(ctx context.Context, request GetPlaceRequestObject) (GetPlaceResponseObject, error)
+	// Patch place
+	// (PATCH /places/{id})
+	PatchPlace(ctx context.Context, request PatchPlaceRequestObject) (PatchPlaceResponseObject, error)
 }
 
 type StrictHandlerFunc = strictnethttp.StrictHTTPHandlerFunc
@@ -814,25 +486,23 @@ type strictHandler struct {
 	options     StrictHTTPServerOptions
 }
 
-// ListAddresses operation middleware
-func (sh *strictHandler) ListAddresses(w http.ResponseWriter, r *http.Request, params ListAddressesParams) {
-	var request ListAddressesRequestObject
-
-	request.Params = params
+// ListPlaces operation middleware
+func (sh *strictHandler) ListPlaces(w http.ResponseWriter, r *http.Request) {
+	var request ListPlacesRequestObject
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.ListAddresses(ctx, request.(ListAddressesRequestObject))
+		return sh.ssi.ListPlaces(ctx, request.(ListPlacesRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "ListAddresses")
+		handler = middleware(handler, "ListPlaces")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(ListAddressesResponseObject); ok {
-		if err := validResponse.VisitListAddressesResponse(w); err != nil {
+	} else if validResponse, ok := response.(ListPlacesResponseObject); ok {
+		if err := validResponse.VisitListPlacesResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -840,11 +510,11 @@ func (sh *strictHandler) ListAddresses(w http.ResponseWriter, r *http.Request, p
 	}
 }
 
-// CreateAddress operation middleware
-func (sh *strictHandler) CreateAddress(w http.ResponseWriter, r *http.Request) {
-	var request CreateAddressRequestObject
+// CreatePlace operation middleware
+func (sh *strictHandler) CreatePlace(w http.ResponseWriter, r *http.Request) {
+	var request CreatePlaceRequestObject
 
-	var body CreateAddressJSONRequestBody
+	var body CreatePlaceJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
 		return
@@ -852,18 +522,18 @@ func (sh *strictHandler) CreateAddress(w http.ResponseWriter, r *http.Request) {
 	request.Body = &body
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.CreateAddress(ctx, request.(CreateAddressRequestObject))
+		return sh.ssi.CreatePlace(ctx, request.(CreatePlaceRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "CreateAddress")
+		handler = middleware(handler, "CreatePlace")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(CreateAddressResponseObject); ok {
-		if err := validResponse.VisitCreateAddressResponse(w); err != nil {
+	} else if validResponse, ok := response.(CreatePlaceResponseObject); ok {
+		if err := validResponse.VisitCreatePlaceResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -871,25 +541,25 @@ func (sh *strictHandler) CreateAddress(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// DeleteAddress operation middleware
-func (sh *strictHandler) DeleteAddress(w http.ResponseWriter, r *http.Request, id string) {
-	var request DeleteAddressRequestObject
+// DeletePlace operation middleware
+func (sh *strictHandler) DeletePlace(w http.ResponseWriter, r *http.Request, id Id) {
+	var request DeletePlaceRequestObject
 
 	request.Id = id
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.DeleteAddress(ctx, request.(DeleteAddressRequestObject))
+		return sh.ssi.DeletePlace(ctx, request.(DeletePlaceRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "DeleteAddress")
+		handler = middleware(handler, "DeletePlace")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(DeleteAddressResponseObject); ok {
-		if err := validResponse.VisitDeleteAddressResponse(w); err != nil {
+	} else if validResponse, ok := response.(DeletePlaceResponseObject); ok {
+		if err := validResponse.VisitDeletePlaceResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -897,25 +567,25 @@ func (sh *strictHandler) DeleteAddress(w http.ResponseWriter, r *http.Request, i
 	}
 }
 
-// GetAddress operation middleware
-func (sh *strictHandler) GetAddress(w http.ResponseWriter, r *http.Request, id string) {
-	var request GetAddressRequestObject
+// GetPlace operation middleware
+func (sh *strictHandler) GetPlace(w http.ResponseWriter, r *http.Request, id Id) {
+	var request GetPlaceRequestObject
 
 	request.Id = id
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.GetAddress(ctx, request.(GetAddressRequestObject))
+		return sh.ssi.GetPlace(ctx, request.(GetPlaceRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetAddress")
+		handler = middleware(handler, "GetPlace")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(GetAddressResponseObject); ok {
-		if err := validResponse.VisitGetAddressResponse(w); err != nil {
+	} else if validResponse, ok := response.(GetPlaceResponseObject); ok {
+		if err := validResponse.VisitGetPlaceResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -923,13 +593,13 @@ func (sh *strictHandler) GetAddress(w http.ResponseWriter, r *http.Request, id s
 	}
 }
 
-// UpdateAddress operation middleware
-func (sh *strictHandler) UpdateAddress(w http.ResponseWriter, r *http.Request, id string) {
-	var request UpdateAddressRequestObject
+// PatchPlace operation middleware
+func (sh *strictHandler) PatchPlace(w http.ResponseWriter, r *http.Request, id Id) {
+	var request PatchPlaceRequestObject
 
 	request.Id = id
 
-	var body UpdateAddressJSONRequestBody
+	var body PatchPlaceJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
 		return
@@ -937,160 +607,18 @@ func (sh *strictHandler) UpdateAddress(w http.ResponseWriter, r *http.Request, i
 	request.Body = &body
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.UpdateAddress(ctx, request.(UpdateAddressRequestObject))
+		return sh.ssi.PatchPlace(ctx, request.(PatchPlaceRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "UpdateAddress")
+		handler = middleware(handler, "PatchPlace")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(UpdateAddressResponseObject); ok {
-		if err := validResponse.VisitUpdateAddressResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// ListRestaurants operation middleware
-func (sh *strictHandler) ListRestaurants(w http.ResponseWriter, r *http.Request, params ListRestaurantsParams) {
-	var request ListRestaurantsRequestObject
-
-	request.Params = params
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.ListRestaurants(ctx, request.(ListRestaurantsRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "ListRestaurants")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(ListRestaurantsResponseObject); ok {
-		if err := validResponse.VisitListRestaurantsResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// CreateRestaurant operation middleware
-func (sh *strictHandler) CreateRestaurant(w http.ResponseWriter, r *http.Request) {
-	var request CreateRestaurantRequestObject
-
-	var body CreateRestaurantJSONRequestBody
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
-		return
-	}
-	request.Body = &body
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.CreateRestaurant(ctx, request.(CreateRestaurantRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "CreateRestaurant")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(CreateRestaurantResponseObject); ok {
-		if err := validResponse.VisitCreateRestaurantResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// DeleteRestaurant operation middleware
-func (sh *strictHandler) DeleteRestaurant(w http.ResponseWriter, r *http.Request, id string) {
-	var request DeleteRestaurantRequestObject
-
-	request.Id = id
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.DeleteRestaurant(ctx, request.(DeleteRestaurantRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "DeleteRestaurant")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(DeleteRestaurantResponseObject); ok {
-		if err := validResponse.VisitDeleteRestaurantResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// GetRestaurant operation middleware
-func (sh *strictHandler) GetRestaurant(w http.ResponseWriter, r *http.Request, id string) {
-	var request GetRestaurantRequestObject
-
-	request.Id = id
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.GetRestaurant(ctx, request.(GetRestaurantRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetRestaurant")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(GetRestaurantResponseObject); ok {
-		if err := validResponse.VisitGetRestaurantResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// UpdateRestaurant operation middleware
-func (sh *strictHandler) UpdateRestaurant(w http.ResponseWriter, r *http.Request, id string) {
-	var request UpdateRestaurantRequestObject
-
-	request.Id = id
-
-	var body UpdateRestaurantJSONRequestBody
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
-		return
-	}
-	request.Body = &body
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.UpdateRestaurant(ctx, request.(UpdateRestaurantRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "UpdateRestaurant")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(UpdateRestaurantResponseObject); ok {
-		if err := validResponse.VisitUpdateRestaurantResponse(w); err != nil {
+	} else if validResponse, ok := response.(PatchPlaceResponseObject); ok {
+		if err := validResponse.VisitPatchPlaceResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

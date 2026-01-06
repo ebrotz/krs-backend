@@ -333,8 +333,8 @@ type ListPlacesResponseObject interface {
 }
 
 type ListPlaces200JSONResponse struct {
-	Items *[]Address `json:"items,omitempty"`
-	Total *int       `json:"total,omitempty"`
+	Items *[]Place `json:"items,omitempty"`
+	Total *int     `json:"total,omitempty"`
 }
 
 func (response ListPlaces200JSONResponse) VisitListPlacesResponse(w http.ResponseWriter) error {

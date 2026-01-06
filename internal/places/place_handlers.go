@@ -2,6 +2,7 @@ package places
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/ebrotz/krs-backend/api"
 )
@@ -13,9 +14,19 @@ type placeService struct {
 // make sure *placeService complies with api.StrictServerInterface
 var _ api.StrictServerInterface = (*placeService)(nil)
 
+func ptr[T any](val T) *T {
+	return &val
+}
+
 // ListPlaces implements api.StrictServerInterface
 func (s *placeService) ListPlaces(ctx context.Context, request api.ListPlacesRequestObject) (api.ListPlacesResponseObject, error) {
-	panic("not implemented")
+	// TODO This should be retrieved from the database.
+	places := []api.Place{
+		{Name: ptr("Place 1")},
+		{Name: ptr("Place 2")},
+		{Name: ptr("Place 3")},
+	}
+	return api.ListPlaces200JSONResponse(places), nil
 }
 
 // CreatePlace implements api.StrictServerInterface
@@ -39,6 +50,8 @@ func (s *placeService) PatchPlace(ctx context.Context, request api.PatchPlaceReq
 
 // NewPlaceHandler returns an http handler implementing the generated ServerInterface
 // backed by placeService. The service methods are intentionally unimplemented stubs.
-func NewPlaceHandler() api.ServerInterface {
-	return api.NewStrictHandler(&placeService{}, nil)
+func NewPlaceHandler() http.Handler {
+	service := &placeService{}
+	serverInterface := api.NewStrictHandler(service, nil)
+	return api.Handler(serverInterface)
 }

@@ -14,19 +14,13 @@ paths:
         - places
       responses:
         '200':
-          description: A paged list of addresses
+          description: Retrieves all places
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  total:
-                    type: integer
-                    example: 1
-                  items:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Place'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Place'
     post:
       summary: Create an place
       operationId: createPlace

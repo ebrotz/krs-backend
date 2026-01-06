@@ -332,10 +332,7 @@ type ListPlacesResponseObject interface {
 	VisitListPlacesResponse(w http.ResponseWriter) error
 }
 
-type ListPlaces200JSONResponse struct {
-	Items *[]Place `json:"items,omitempty"`
-	Total *int     `json:"total,omitempty"`
-}
+type ListPlaces200JSONResponse []Place
 
 func (response ListPlaces200JSONResponse) VisitListPlacesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")

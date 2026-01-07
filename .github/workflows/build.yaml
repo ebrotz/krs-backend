@@ -45,7 +45,7 @@ jobs:
             type=sha,event=branch,prefix=
             type=ref,event=tag,pattern={{version}}
             type=sha,event=pr,prefix=
-            latest
+            type=raw,value=latest,enable={{is_default_branch}}
       - name: Build and push
         uses: docker/build-push-action@v6
         with:

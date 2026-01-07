@@ -11,7 +11,7 @@ COPY api api/
 COPY cmd cmd/
 COPY internal internal/
 
-RUN CGO_ENABLED=0 go build -o /go/bin/app
+RUN CGO_ENABLED=0 go build -C cmd -o /go/bin/app
 
 # Now copy it into our base image.
 FROM gcr.io/distroless/static-debian12

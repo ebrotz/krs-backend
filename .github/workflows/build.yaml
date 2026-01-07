@@ -32,5 +32,5 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           platforms: linux/amd64,linux/arm64
-          push: true
-          tags: krs-backend:latest
+          push: ${{ github.ref_type == 'tag' ||  github.ref_name == 'main' }}
+          tags: krs-backend:${{ github.ref_name == 'main' && 'latest' || github.ref_type == 'tag' && github.ref_name }}

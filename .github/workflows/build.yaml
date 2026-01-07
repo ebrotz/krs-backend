@@ -40,6 +40,12 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=schedule
+            type=sha,event=branch
+            type=ref,event=tag,pattern={{version}}
+            type=sha,event=pr
+            latest
       - name: Build and push
         uses: docker/build-push-action@v6
         with:

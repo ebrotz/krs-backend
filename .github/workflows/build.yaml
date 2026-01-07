@@ -42,9 +42,9 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=schedule
-            type=sha,event=branch
+            type=sha,event=branch,prefix=
             type=ref,event=tag,pattern={{version}}
-            type=sha,event=pr
+            type=sha,event=pr,prefix=
             latest
       - name: Build and push
         uses: docker/build-push-action@v6

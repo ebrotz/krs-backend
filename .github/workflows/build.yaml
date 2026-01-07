@@ -10,11 +10,11 @@ jobs:
           go-version: '1.25'
           cache-dependency-path: go.sum
       - name: Install dependencies
-        run: go get .
+        run: go get ./...
       - name: Build
         run: go build -v ./...
       - name: Test
-        run: go test ./...f
+        run: go test ./...
   image:
     runs-on: ubuntu-latest
     steps:

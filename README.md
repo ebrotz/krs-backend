@@ -19,3 +19,9 @@ go build -C cmd -o '../krs-backend'
 ```shell
 go run -C cmd server.go
 ```
+
+## Build Image
+
+```shell
+docker image build -t "krs-backend:$(git rev-parse --short HEAD)" .
+```

@@ -23,6 +23,8 @@ jobs:
   image:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
       - name: Login to container registry
         uses: docker/login-action@v3
         with:
@@ -33,7 +35,7 @@ jobs:
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      - name: Docker meta
+      - name: Gather image metadata
         id: meta
         uses: docker/metadata-action@v5
         with:

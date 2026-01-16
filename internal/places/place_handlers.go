@@ -2,6 +2,7 @@ package places
 
 import (
 	"context"
+	"log"
 	"net/http"
 
 	"github.com/ebrotz/krs-backend/api"
@@ -21,6 +22,7 @@ func ptr[T any](val T) *T {
 // ListPlaces implements api.StrictServerInterface
 func (s *placeService) ListPlaces(ctx context.Context, request api.ListPlacesRequestObject) (api.ListPlacesResponseObject, error) {
 	// TODO This should be retrieved from the database.
+	log.Default().Println("ListPlaces")
 	places := []api.Place{
 		{Name: ptr("Place 1")},
 		{Name: ptr("Place 2")},
@@ -48,10 +50,19 @@ func (s *placeService) PatchPlace(ctx context.Context, request api.PatchPlaceReq
 	panic("not implemented")
 }
 
+// allowAllOrigins is a middleware that sets the 'Access-Control-Allow-Origins'
+// header to '*'.
+func allowAllOrigins(f api.StrictHandlerFunc, operationId string) api.StrictHandlerFunc {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (response interface{}, err error) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		return f(ctx, w, r, request)
+	}
+}
+
 // NewPlaceHandler returns an http handler implementing the generated ServerInterface
 // backed by placeService. The service methods are intentionally unimplemented stubs.
 func NewPlaceHandler() http.Handler {
 	service := &placeService{}
-	serverInterface := api.NewStrictHandler(service, nil)
+	serverInterface := api.NewStrictHandler(service, []api.StrictMiddlewareFunc{allowAllOrigins})
 	return api.Handler(serverInterface)
 }

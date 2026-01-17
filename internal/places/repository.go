@@ -2,9 +2,11 @@ package places
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/ebrotz/krs-backend/api"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 // repository is an abstraction layer of any persistence layer of places.
@@ -22,11 +24,17 @@ var _ repository = (*postgresRepository)(nil)
 // pgx driver.
 type postgresRepository struct {
 	// database connection
-	pg *pgx.Conn
+	pool pgxpool.Pool
 }
 
 func (p *postgresRepository) ListPlaces(ctx context.Context) ([]api.Place, error) {
-	return nil, nil
+	rows, err := p.pool.Query(ctx, "select * from v1.places")
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to query from db: %w", err)
+	}
+
+	return pgx.CollectRows(rows, pgx.RowTo[api.Place])
 }
 
 func (p *postgresRepository) GetPlace(id int) (api.Place, error) {

@@ -8,8 +8,10 @@ import (
 	"github.com/ebrotz/krs-backend/api"
 )
 
+// placeService represents the service layer that the application should use
+// to interact with 'Place' resources.
 type placeService struct {
-	// TODO: add dependencies (db, logger, etc.)
+	r repository
 }
 
 // make sure *placeService complies with api.StrictServerInterface

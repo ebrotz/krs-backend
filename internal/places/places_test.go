@@ -7,11 +7,18 @@ import (
 	"testing"
 
 	"github.com/ebrotz/krs-backend/api"
+	"github.com/ebrotz/krs-backend/internal/config"
 )
 
 func TestListPlaces(t *testing.T) {
 	var places []api.Place
-	server := httptest.NewServer(NewPlaceHandler())
+	h, err := NewPlaceHandler(t.Context(), &config.Config{})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	server := httptest.NewServer(h)
 	defer server.Close()
 
 	client := server.Client()

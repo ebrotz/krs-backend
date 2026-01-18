@@ -8,10 +8,10 @@ type Config struct {
 	DatabaseUrl string
 }
 
-func ConfigFromEnv() Config {
+func ConfigFromEnv() *Config {
 	databaseUrl, _ := os.LookupEnv("DATABASE_URL")
 
-	return Config{
+	return &Config{
 		DatabaseUrl: databaseUrl,
 	}
 }

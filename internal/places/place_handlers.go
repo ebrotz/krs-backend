@@ -2,10 +2,13 @@ package places
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/ebrotz/krs-backend/api"
+	"github.com/ebrotz/krs-backend/internal/config"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 // placeService represents the service layer that the application should use
@@ -23,13 +26,13 @@ func ptr[T any](val T) *T {
 
 // ListPlaces implements api.StrictServerInterface
 func (s *placeService) ListPlaces(ctx context.Context, request api.ListPlacesRequestObject) (api.ListPlacesResponseObject, error) {
-	// TODO This should be retrieved from the database.
 	log.Default().Println("ListPlaces")
-	places := []api.Place{
-		{Name: ptr("Place 1")},
-		{Name: ptr("Place 2")},
-		{Name: ptr("Place 3")},
+	places, err := s.r.ListPlaces(ctx)
+
+	if err != nil {
+		return nil, err
 	}
+
 	return api.ListPlaces200JSONResponse(places), nil
 }
 
@@ -63,8 +66,32 @@ func allowAllOrigins(f api.StrictHandlerFunc, operationId string) api.StrictHand
 
 // NewPlaceHandler returns an http handler implementing the generated ServerInterface
 // backed by placeService. The service methods are intentionally unimplemented stubs.
-func NewPlaceHandler() http.Handler {
-	service := &placeService{}
+func NewPlaceHandler(ctx context.Context, config *config.Config) (http.Handler, error) {
+	var r repository
+
+	if config.DatabaseUrl != "" {
+		pool, err := pgxpool.New(ctx, config.DatabaseUrl)
+
+		if err != nil {
+			return nil, fmt.Errorf("failed to create pgx pool: %w", err)
+		}
+
+		r = &postgresRepository{
+			pool: pool,
+		}
+	} else {
+		log.Default().Println("Using in-memory repository for Places")
+
+		r = &inMemoryRepository{
+			places: map[int]api.Place{
+				0: {Name: ptr("Place 1"), Description: ptr("Seafood")},
+				1: {Name: ptr("Place 2"), Description: ptr("Gastropub")},
+				2: {Name: ptr("Place 3"), Description: ptr("Asian")},
+			},
+		}
+	}
+
+	service := &placeService{r: r}
 	serverInterface := api.NewStrictHandler(service, []api.StrictMiddlewareFunc{allowAllOrigins})
-	return api.Handler(serverInterface)
+	return api.Handler(serverInterface), nil
 }

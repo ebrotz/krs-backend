@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/ebrotz/krs-backend/api"
+	v1 "github.com/ebrotz/krs-backend/internal/data/v1"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -28,13 +29,28 @@ type postgresRepository struct {
 }
 
 func (p *postgresRepository) ListPlaces(ctx context.Context) ([]api.Place, error) {
-	rows, err := p.pool.Query(ctx, "select * from v1.places")
+	var ret []api.Place
+	rows, err := p.pool.Query(ctx, "select * from places")
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to query from db: %w", err)
 	}
 
-	return pgx.CollectRows(rows, pgx.RowTo[api.Place])
+	places, err := pgx.CollectRows(rows, pgx.RowToStructByName[v1.Place])
+
+	if err != nil {
+		return nil, fmt.Errorf("pg repository: failed to collect rows %w", err)
+	}
+
+	for _, p := range places {
+		ret = append(ret, api.Place{
+			// TODO ID
+			Description: &p.Description,
+			Name:        &p.Name,
+		})
+	}
+
+	return ret, nil
 }
 
 func (p *postgresRepository) GetPlace(id int) (*api.Place, error) {

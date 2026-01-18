@@ -14,14 +14,14 @@ CREATE TABLE IF NOT EXISTS v1.places (
 
 -- A place may have 0-M phone numbers.
 CREATE TABLE IF NOT EXISTS v1.place_phone (
-    place_id integer REFERENCES v1.places(id),
+    place_id integer REFERENCES v1.places(id) ON DELETE CASCADE,
     phone text
 );
 
 -- A place may also have 0-M websites. For example, a place with several
 -- locations having location-specific websites.
 CREATE TABLE IF NOT EXISTS v1.place_website (
-    place_id integer REFERENCES v1.places(id),
+    place_id integer REFERENCES v1.places(id) ON DELETE CASCADE,
     website text
 );
 

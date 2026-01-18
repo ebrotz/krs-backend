@@ -7,6 +7,16 @@
             "request": "launch",
             "mode": "debug",
             "program": "cmd/server.go"
+        },
+        {
+            "name": "server with pg",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "cmd/server.go",
+            "env": {
+                "DATABASE_URL": "postgres://krs-backend:krs-backend@localhost:5432/krs-backend?search_path=v1"
+            }
         }
     ]
 }

@@ -39,12 +39,12 @@ type PatchResource struct {
 
 // Place defines model for Place.
 type Place struct {
-	Address     *Address            `json:"address,omitempty"`
-	Description *string             `json:"description"`
-	Id          *openapi_types.UUID `json:"id,omitempty"`
-	Name        *string             `json:"name,omitempty"`
-	Phone       *string             `json:"phone"`
-	Website     *string             `json:"website"`
+	Address     *Address `json:"address,omitempty"`
+	Description *string  `json:"description"`
+	Id          *int64   `json:"id,omitempty"`
+	Name        *string  `json:"name,omitempty"`
+	Phone       *string  `json:"phone"`
+	Website     *string  `json:"website"`
 }
 
 // Id defines model for id.

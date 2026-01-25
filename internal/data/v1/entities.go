@@ -3,7 +3,7 @@ package v1
 // Place represents a Place tuple that would be returned
 // by the database.
 type Place struct {
-	Id          int
+	Id          int64
 	Description string
 	Name        string
 }

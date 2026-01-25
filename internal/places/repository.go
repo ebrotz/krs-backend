@@ -44,7 +44,7 @@ func (p *postgresRepository) ListPlaces(ctx context.Context) ([]api.Place, error
 
 	for _, p := range places {
 		ret = append(ret, api.Place{
-			// TODO ID
+			Id: &p.Id,
 			Description: &p.Description,
 			Name:        &p.Name,
 		})

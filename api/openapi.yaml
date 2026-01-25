@@ -125,9 +125,9 @@ components:
       type: object
       properties:
         id:
-          type: string
-          format: uuid
-          example: "b7e23ec2-1f21-4d2a-8f7f-a6d5f1b9e8e1"
+          type: integer
+          format: int64
+          example: 123
         name:
           type: string
           example: "Pasta Palace"

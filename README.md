@@ -20,8 +20,21 @@ go build -C cmd -o '../krs-backend'
 go run -C cmd server.go
 ```
 
+When using Postgres, first bring up the database:
+
+```shell
+docker compose up
+```
+
+Then start the backend:
+
+```shell
+make run
+```
+
 ## Build Image
 
 ```shell
 docker image build -t "krs-backend:$(git rev-parse --short HEAD)" .
 ```
+
